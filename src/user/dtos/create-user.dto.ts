@@ -1,15 +1,24 @@
-import { IsString, IsEmail, IsNotEmpty, MinLength } from 'class-validator';
+import { IsString, IsEmail, IsEnum, IsOptional, MinLength, MaxLength, IsBoolean } from 'class-validator';
+import { UserRole } from '../user.entity';
 
 export class CreateUserDto {
   @IsString()
-  @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(20)
   username: string;
 
   @IsEmail()
-  @IsNotEmpty()
   email: string;
 
   @IsString()
-  @MinLength(6)
+  @MinLength(8)
   password: string;
+
+  @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole; // Opcional, com padrão definido na entidade
+
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean; // Permitido configurar, mas padrão é `true`
 }
