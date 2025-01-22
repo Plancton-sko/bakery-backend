@@ -45,7 +45,7 @@ export class UserService {
       }
 
       // Recupera o usuário atualizado
-      const updatedUser = await this.userRepository.findOne({ where: { id } });
+      const updatedUser = await this.userRepository.findOne({ where: { id } }); 
       updatedUser.lastUpdateAt = new Date();
 
       return plainToInstance(UserOutputDto, updatedUser);
