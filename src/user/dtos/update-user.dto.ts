@@ -1,3 +1,4 @@
+// src/user/dtos/update-user.dto.ts
 import { IsString, IsOptional, IsEnum, IsBoolean, IsEmail, MinLength, MaxLength } from 'class-validator';
 import { UserRole } from '../user.entity';
 
