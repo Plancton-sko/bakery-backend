@@ -7,13 +7,14 @@ import { CreateUserDto } from './dtos/create-user.dto';
 import { plainToInstance } from 'class-transformer';
 import { UserOutputDto } from './dtos/user-output.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { UserOutputSecureDto } from './dtos/user-output-secure.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   // Criar usuário
   async create(createUserDto: CreateUserDto): Promise<UserOutputDto> {
@@ -105,4 +106,31 @@ export class UserService {
       throw new InternalServerErrorException('Failed to toggle user status.');
     }
   }
+
+  async findOneByEmail(email: string): Promise<UserOutputDto> {
+    try {
+      const user = await this.userRepository.findOne({ where: { email } });
+      if (!user) {
+        throw new NotFoundException(`User with email ${email} not found.`);
+      }
+      return plainToInstance(UserOutputDto, user);
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to retrieve user by email.');
+    }
+  }
+  
+  async findOneByEmailSecure(email: string): Promise<UserOutputSecureDto> {
+    try {
+      const user = await this.userRepository.findOne({ where: { email } });
+      if (!user) {
+        throw new NotFoundException(`User with email ${email} not found.`);
+      }
+      return plainToInstance(UserOutputSecureDto, user);
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to retrieve user by email.');
+    }
+  }
+
+  
 }
+
