@@ -6,7 +6,7 @@ import { ConflictException } from '@nestjs/common';
 
 export enum UserRole {
   ADMIN = 'admin',
-  USER = 'user',
+  USER = 'user', // noob
   MODERATOR = 'moderator',
 }
 
@@ -50,6 +50,12 @@ export class User {
   @Column({ type: 'timestamp', nullable: true })
   lastActivityAt: Date | null;
 
+  @Column({ type: 'timestamp', nullable: true })
+  lastSessionAt: Date | null;
+
+  @Column({ type: 'jsonb', nullable: true })
+  sessionMetadata: Record<string, any>;
+
   @BeforeInsert()
   @BeforeUpdate()
   async hashPassword(): Promise<void> {
@@ -83,7 +89,7 @@ export class User {
     this.isActive = false;
     this.isDeleted = true;
     this.wasDeletedAt = new Date();
-  }  
+  }
   /**
    * Ativa o usuário, revertendo as marcações de inatividade e exclusão
    */

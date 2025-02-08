@@ -1,21 +1,25 @@
+// src/auth/auth.module.ts
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { UserModule } from 'src/user/user.module';
-import { JwtStrategy } from './jwt/jwt.strategy';
+import { UserModule } from '../user/user.module';
+import { SessionSerializer } from './session.serializer';
+import { AuthenticatedGuard } from './guards/authenticated.guard';
+import { LocalStrategy } from './strategies/local.strategy';
 
 @Module({
   imports: [
     UserModule,
-    PassportModule,
-    JwtModule.register({
-      secret: process.env.JWT_SECRET || 'sua_chave_secreta', // Defina um segredo seguro em variáveis de ambiente!
-      signOptions: { expiresIn: '1h' }, // Expiração do access token
-    }),
+    PassportModule.register({ session: true }), // Enable session support
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    SessionSerializer,
+    AuthenticatedGuard,
+  ],
+  exports: [AuthService],
 })
-export class AuthModule {}
+export class AuthModule { }

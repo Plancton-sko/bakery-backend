@@ -17,7 +17,7 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsEnum(UserRole)
-  role?: UserRole; // Opcional, com padrão definido na entidade
+  role?: UserRole = UserRole.USER; // Opcional, com padrão definido na entidade
 
   @IsOptional()
   @IsBoolean()

@@ -1,8 +1,8 @@
 // src/user/user.service.ts
-import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './user.entity';
+import { User, UserRole } from './user.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { plainToInstance } from 'class-transformer';
 import { UserOutputDto } from './dtos/user-output.dto';
@@ -11,6 +11,9 @@ import { UserOutputSecureDto } from './dtos/user-output-secure.dto';
 
 @Injectable()
 export class UserService {
+
+  private readonly logger = new Logger(UserService.name);
+
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
@@ -23,10 +26,30 @@ export class UserService {
       await this.userRepository.save(user);
       return plainToInstance(UserOutputDto, user);
     } catch (error) {
-      if (error.code === '23505') {
+      if ((error as any).code === '23505') {
+        this.logger.error
         throw new ConflictException('Unique constraint violated.');
       }
       throw new InternalServerErrorException('Failed to create user.');
+    }
+  }
+
+  // Criar usuário admin
+  async createAdmin(createUserDto: CreateUserDto): Promise<UserOutputDto> {
+    try {
+      const adminUser = this.userRepository.create({
+        ...createUserDto,
+        role: UserRole.ADMIN,
+        isActive: true
+      });
+
+      await this.userRepository.save(adminUser);
+      return plainToInstance(UserOutputDto, adminUser);
+    } catch (error) {
+      if ((error as any).code === '23505') {
+        throw new ConflictException('Admin user already exists');
+      }
+      throw new InternalServerErrorException('Failed to create admin user');
     }
   }
 
@@ -64,7 +87,7 @@ export class UserService {
       updatedUser.lastUpdateAt = new Date();
       return plainToInstance(UserOutputDto, updatedUser);
     } catch (error) {
-      if (error.code === '23505') {
+      if ((error as any).code === '23505') {
         throw new ConflictException('Unique constraint violated.');
       }
       throw new InternalServerErrorException('Failed to update user.');
@@ -82,7 +105,7 @@ export class UserService {
       await this.userRepository.save(user);
       return plainToInstance(UserOutputDto, user);
     } catch (error) {
-      if (error.code === '23505') {
+      if ((error as any).code === '23505') {
         throw new ConflictException('Unique constraint violated.');
       }
       throw new InternalServerErrorException('Failed to delete user.');
@@ -100,7 +123,7 @@ export class UserService {
       await this.userRepository.save(user);
       return plainToInstance(UserOutputDto, user);
     } catch (error) {
-      if (error.code === '23505') {
+      if ((error as any).code === '23505') {
         throw new ConflictException('Unique constraint violated.');
       }
       throw new InternalServerErrorException('Failed to toggle user status.');
@@ -118,19 +141,18 @@ export class UserService {
       throw new InternalServerErrorException('Failed to retrieve user by email.');
     }
   }
-  
-  async findOneByEmailSecure(email: string): Promise<UserOutputSecureDto> {
-    try {
-      const user = await this.userRepository.findOne({ where: { email } });
-      if (!user) {
-        throw new NotFoundException(`User with email ${email} not found.`);
-      }
-      return plainToInstance(UserOutputSecureDto, user);
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to retrieve user by email.');
-    }
-  }
 
-  
+  async findOneByEmailSecure(email: string): Promise<UserOutputSecureDto> {
+    const user = await this.userRepository.findOne({
+      where: { email },
+      select: ['id', 'username', 'email', 'password', 'role', 'isActive']
+    });
+
+    if (!user) {
+      throw new NotFoundException(`Usuário com email ${email} não encontrado`);
+    }
+
+    return plainToInstance(UserOutputSecureDto, user);
+  }
 }
 

@@ -1,13 +1,18 @@
 // src/app.controller.ts
 import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { RedisService } from './redis/redis.service';
+
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly redisService: RedisService) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Get('health/redis')
+  async checkRedis() {
+    const ping = await this.redisService.client.ping();
+    return {
+      status: ping === 'PONG' ? 'OK' : 'ERROR',
+      redisVersion: await this.redisService.client.info('server')
+    };
   }
 }
