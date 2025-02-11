@@ -103,13 +103,13 @@ async function bootstrap() {
       store: new RedisStore({
         client: redisClient,
         prefix: 'session:',
-        ttl: 86400 // 1 day in seconds
+        // ttl: 86400 // 1 day in seconds
       }),
       secret: configService.get('SESSION_SECRET'),
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: configService.get('NODE_ENV') === 'production',
+        secure: false,
         httpOnly: true,
         maxAge: 86400 * 1000, // 1 day in ms
         sameSite: 'lax'

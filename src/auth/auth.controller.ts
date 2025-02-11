@@ -1,5 +1,5 @@
 // src/auth/auth.controller.ts
-import { Controller, Get, InternalServerErrorException, Post, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, InternalServerErrorException, Post, Request, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserOutputDto } from 'src/user/dtos/user-output.dto';
 import { plainToInstance } from 'class-transformer';
@@ -13,11 +13,17 @@ export class AuthController {
 
   @Post('login')
   @UseGuards(LocalAuthGuard)
-  async login(@Request() req): Promise<LoginResponseDto> {
-    return {
+  async login(@Request() req, @Res() res) {
+    await new Promise<void>((resolve, reject) => {
+      req.logIn(req.user, (err) => {
+        if (err) return reject(err);
+        resolve();
+      });
+    });
+    return res.json({
       message: 'Login successful',
       user: plainToInstance(UserOutputDto, req.user)
-    };
+    });
   }
 
   @Post('logout')
