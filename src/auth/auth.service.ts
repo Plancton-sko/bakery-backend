@@ -14,6 +14,7 @@ export class AuthService {
     console.log("Authservice: O email é: ", email, "\nA senha é: ", password);
     const user = await this.userService.findOneByEmailSecure(email);
     if (!user || !(await bcrypt.compare(password, user.password))) {
+      console.log();
       throw new UnauthorizedException('Invalid credentials');
     }
     return user;

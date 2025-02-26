@@ -143,6 +143,7 @@ export class UserService {
   }
 
   async findOneByEmailSecure(email: string): Promise<UserOutputSecureDto> {
+    try {
     const user = await this.userRepository.findOne({
       where: { email },
       select: ['id', 'username', 'email', 'password', 'role', 'isActive']
@@ -153,6 +154,8 @@ export class UserService {
     }
 
     return plainToInstance(UserOutputSecureDto, user);
+  } catch (error) {
+    throw new InternalServerErrorException('Failed to find');
   }
-}
+}}
 

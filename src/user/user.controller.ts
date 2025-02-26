@@ -11,6 +11,7 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RolesGuard } from 'src/auth/guards/role.guard';
 import { SessionAuthGuard } from 'src/auth/guards/session-auth.guard';
 import { LocalAuthGuard } from 'src/auth/guards/local-auth.guard';
+import { AuthenticatedGuard } from 'src/auth/guards/authenticated.guard';
 
 @Controller('users')
 export class UserController {
@@ -25,8 +26,8 @@ export class UserController {
 
   // Listar todos os usuários
   @Get()
-  @UseGuards(LocalAuthGuard)
-  // @Roles(UserRole.ADMIN)
+  @UseGuards(AuthenticatedGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   async findAll() {
     return this.userService.findAll();
   }

@@ -1,5 +1,5 @@
 // src/app.module.ts
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -11,6 +11,7 @@ import { UserModule } from './user/user.module';
 import { PassportModule } from '@nestjs/passport';
 import { SessionSerializer } from './auth/session.serializer';
 import { RedisModule } from './redis/redis.module';
+import { LoggingMiddleware } from './common/middleware/logging.middleware';
 
 @Module({
   imports: [
@@ -44,4 +45,10 @@ import { RedisModule } from './redis/redis.module';
     // SessionSerializer,
   ],
 })
-export class AppModule { }
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LoggingMiddleware)
+      .forRoutes('*'); // Aplica a todas as rotas
+  }
+}

@@ -7,16 +7,21 @@ import session from 'express-session';
 import * as csurf from 'csurf';
 import { createClient } from 'redis';
 import { RedisStore } from 'connect-redis';
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import passport from 'passport';
+import { EnhancedNativeLogger } from './common/logger/nest-logger.service';
 
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    bufferLogs: true,
+    bufferLogs: true
   });
+
+  const logger = new EnhancedNativeLogger();
+  app.useLogger(logger);
+
   const configService = app.get(ConfigService);
-  const logger = new Logger('Bootstrap');
+
 
   // ==================== Helmet Configuration ====================
   app.use(
@@ -62,49 +67,17 @@ async function bootstrap() {
 
   app.enableCors(corsOptions);
 
-  // ==================== Redis Client ====================
+  // =========================== Redis ==============================
+
   const redisClient = createClient({
-    url: configService.get('REDIS_URL'),
-    legacyMode: true,
-    socket: {
-      reconnectStrategy: (attempts) => {
-        console.log(`Tentativa de reconexão #${attempts}`);
-        return Math.min(attempts * 100, 3000);
-      }
-    }
+    url: process.env.REDIS_URL
   });
-
-  redisClient.on('error', (err) => {
-    console.error('Erro no cliente Redis:', err);
-  });
-
-  redisClient.on('connect', () => {
-    console.log('Conectando ao Redis...');
-  });
-
-  redisClient.on('ready', () => {
-    console.log('Conexão com Redis estabelecida com sucesso!');
-  });
-
-  try {
-    await redisClient.connect();
-  } catch (error) {
-    console.error('Erro detalhado:', error);
-    if (error instanceof AggregateError) {
-      console.error('Erros individuais:');
-      error.errors.forEach((e, i) => console.error(`[${i}]`, e));
-    }
-    process.exit(1);
-  }
+  redisClient.connect().catch(console.error);
 
   // ==================== Session Configuration ====================
   app.use(
     session({
-      store: new RedisStore({
-        client: redisClient,
-        prefix: 'session:',
-        // ttl: 86400 // 1 day in seconds
-      }),
+      store: new RedisStore({ client: redisClient as any }),
       secret: configService.get('SESSION_SECRET'),
       resave: false,
       saveUninitialized: false,
@@ -135,8 +108,12 @@ async function bootstrap() {
 
   // ==================== Start the Server =======================
 
+  app.useGlobalPipes(new ValidationPipe());
+
   const port = configService.get('PORT') || 3000;
   await app.listen(port);
-  console.log(`Application running on port ${port}`);
+  // console.log(`Application running on port ${port}`);
+  // Modificação crítica aqui ↓
+  logger.log(`Application is running on: http://localhost:${port}`, 'Bootstrap');
 }
 bootstrap();

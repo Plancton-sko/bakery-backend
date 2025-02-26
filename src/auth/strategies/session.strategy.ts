@@ -14,6 +14,7 @@ export class SessionStrategy extends PassportStrategy(Strategy, 'session') {
   }
 
   async validate(email: string, password: string): Promise<any> {
+    console.log("Session Strategy: O email é: ", email, "\nA senha é: ", password);
     const user = await this.authService.validateUser(email, password);
     if (!user || !user.isActive) {
       throw new UnauthorizedException('Invalid credentials or inactive account');
