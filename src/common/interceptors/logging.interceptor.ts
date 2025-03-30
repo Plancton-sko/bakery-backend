@@ -7,7 +7,9 @@ import { Request } from 'express';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-  private logger = new EnhancedNativeLogger('HTTP');
+  constructor(private readonly logger: EnhancedNativeLogger) {
+    this.logger.setContext('HTTP');
+  }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const ctx = context.switchToHttp();

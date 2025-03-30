@@ -14,11 +14,10 @@ import { EnhancedNativeLogger } from './common/logger/nest-logger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    bufferLogs: true
+    rawBody: true,
+    logger: ['error', 'warn', 'log', 'debug', 'verbose']
   });
 
-  const logger = new EnhancedNativeLogger();
-  app.useLogger(logger);
 
   const configService = app.get(ConfigService);
 
@@ -91,29 +90,35 @@ async function bootstrap() {
     })
   );
   // ========================== CSRF =============================
-  /*
-  app.use(csurf({
-    cookie: {
-      key: '_csrf',
-      path: '/',
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict'
-    }
-  }));
-  */
+  // app.use(
+  //   csurf({
+  //     cookie: {
+  //       key: '_csurf', // Corrected key without space for clarity
+  //       httpOnly: true,
+  //       secure: false,
+  //       sameSite: 'lax',
+  //     },
+  //   }),
+  // );
   // ==================== Initialize Passport ====================
+
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // ==================== Start the Server =======================
+  // ==================== Global Pipes =======================
 
   app.useGlobalPipes(new ValidationPipe());
 
+  // ==================== Start the Server =======================
+
   const port = configService.get('PORT') || 3000;
+  const logger = app.get(EnhancedNativeLogger);
+  app.useLogger(logger); // Configura o logger global
+
+  logger.log('Aplicação iniciada, configurando serviços...', 'Bootstrap');
+
   await app.listen(port);
-  // console.log(`Application running on port ${port}`);
-  // Modificação crítica aqui ↓
   logger.log(`Application is running on: http://localhost:${port}`, 'Bootstrap');
 }
+console.log("executando")
 bootstrap();

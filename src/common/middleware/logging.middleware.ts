@@ -5,7 +5,9 @@ import { EnhancedNativeLogger } from '../logger/nest-logger.service';
 
 @Injectable()
 export class LoggingMiddleware implements NestMiddleware {
-  private logger = new EnhancedNativeLogger('HTTP');
+  constructor(private readonly logger: EnhancedNativeLogger) {
+    this.logger.setContext('HTTP');
+  }
 
   use(req: Request, res: Response, next: NextFunction) {
     const start = Date.now();

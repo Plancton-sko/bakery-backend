@@ -5,6 +5,7 @@ import { UserController } from './user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { EnhancedNativeLogger } from 'src/common/logger/nest-logger.service';
 
 @Module({
   imports: [
@@ -13,7 +14,9 @@ import { JwtModule } from '@nestjs/jwt';
       secret: process.env.JWT_SECRET ,
       signOptions: { expiresIn: '1h' },
     }),],
-  providers: [UserService],
+  providers: [UserService,
+    EnhancedNativeLogger
+  ],
   controllers: [UserController],
   exports: [UserService]  
 })

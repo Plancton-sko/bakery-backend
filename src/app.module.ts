@@ -12,12 +12,27 @@ import { PassportModule } from '@nestjs/passport';
 import { SessionSerializer } from './auth/session.serializer';
 import { RedisModule } from './redis/redis.module';
 import { LoggingMiddleware } from './common/middleware/logging.middleware';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { EnhancedNativeLogger } from './common/logger/nest-logger.service';
+import { ThrottlerFilter } from './common/filter/throttler.filter';
+import { MongooseModule } from '@nestjs/mongoose';
+import { LogSchema } from './common/logger/log.schema';
+import { LogsService } from './common/logger/logs.service';
+import { ProductModule } from './products/product.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true, // Disponível globalmente
       envFilePath: '.env', // Define o arquivo de variáveis de ambiente
+    }),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60,
+          limit: 10,
+        },
+      ],
     }),
     // Configuração assíncrona do TypeOrm
     TypeOrmModule.forRootAsync({
@@ -34,15 +49,30 @@ import { LoggingMiddleware } from './common/middleware/logging.middleware';
         synchronize: true, // Alterar para `false` em produção
       }),
     }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGODB_URI'),
+      }),
+      inject: [ConfigService],
+    }),
+    MongooseModule.forFeature([{ name: 'Log', schema: LogSchema }]),
     PassportModule.register({ session: true }),
     UserModule,
     AuthModule,
     RedisModule,
+    ProductModule
   ],
   controllers: [AppController],
   providers: [
     AppService,
-    // SessionSerializer,
+    LogsService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+    ThrottlerFilter,
+    EnhancedNativeLogger,
   ],
 })
 export class AppModule implements NestModule {

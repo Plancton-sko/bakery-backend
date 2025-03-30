@@ -5,6 +5,7 @@ import { UserOutputDto } from 'src/user/dtos/user-output.dto';
 import { plainToInstance } from 'class-transformer';
 import { LoginResponseDto } from './dtos/login-response.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
@@ -13,6 +14,7 @@ export class AuthController {
 
   @Post('login')
   @UseGuards(LocalAuthGuard)
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   async login(@Request() req, @Res() res) {
     await new Promise<void>((resolve, reject) => {
       req.logIn(req.user, (err) => {
@@ -22,7 +24,8 @@ export class AuthController {
     });
     return res.json({
       message: 'Login successful',
-      user: plainToInstance(UserOutputDto, req.user)
+      user: plainToInstance(UserOutputDto, req.user),
+      // csrfToken: req.csrfToken(), // Envia o token CSRF
     });
   }
 

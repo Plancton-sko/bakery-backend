@@ -8,15 +8,15 @@ import { plainToInstance } from 'class-transformer';
 import { UserOutputDto } from './dtos/user-output.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { UserOutputSecureDto } from './dtos/user-output-secure.dto';
+import { EnhancedNativeLogger } from 'src/common/logger/nest-logger.service';
 
 @Injectable()
 export class UserService {
 
-  private readonly logger = new Logger(UserService.name);
-
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private readonly logger: EnhancedNativeLogger, // Inject logger here as well
   ) { }
 
   // Criar usuário
@@ -78,18 +78,25 @@ export class UserService {
 
   // Atualizar usuário
   async update(id: string, updateUserDto: UpdateUserDto): Promise<UserOutputDto> {
+    this.logger.log(`[Service] Attempting update for user ${id}`, 'UserService', { updateData: updateUserDto });
     try {
       const result = await this.userRepository.update(id, updateUserDto);
       if (result.affected === 0) {
+        this.logger.warn(`[Service] No user found for update: ${id}`, 'UserService');
         throw new NotFoundException(`User with ID ${id} not found.`);
       }
       const updatedUser = await this.userRepository.findOne({ where: { id } });
       updatedUser.lastUpdateAt = new Date();
+      this.logger.log(`[Service] Successfully updated user ${id}`, 'UserService');
       return plainToInstance(UserOutputDto, updatedUser);
     } catch (error) {
-      if ((error as any).code === '23505') {
-        throw new ConflictException('Unique constraint violated.');
-      }
+      const err = error instanceof Error ? error : new Error(String(error));
+      this.logger.error(
+        `[Service] Failed to update user ${id}`,
+        err.stack, // Agora temos certeza de que err é do tipo Error
+        'UserService',
+        { updateData: updateUserDto }
+      );
       throw new InternalServerErrorException('Failed to update user.');
     }
   }
@@ -144,18 +151,19 @@ export class UserService {
 
   async findOneByEmailSecure(email: string): Promise<UserOutputSecureDto> {
     try {
-    const user = await this.userRepository.findOne({
-      where: { email },
-      select: ['id', 'username', 'email', 'password', 'role', 'isActive']
-    });
+      const user = await this.userRepository.findOne({
+        where: { email },
+        select: ['id', 'username', 'email', 'password', 'role', 'isActive']
+      });
 
-    if (!user) {
-      throw new NotFoundException(`Usuário com email ${email} não encontrado`);
+      if (!user) {
+        throw new NotFoundException(`Usuário com email ${email} não encontrado`);
+      }
+
+      return plainToInstance(UserOutputSecureDto, user);
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to find');
     }
-
-    return plainToInstance(UserOutputSecureDto, user);
-  } catch (error) {
-    throw new InternalServerErrorException('Failed to find');
   }
-}}
+}
 

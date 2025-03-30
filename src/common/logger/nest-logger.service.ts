@@ -1,42 +1,23 @@
-import { ConsoleLogger, Injectable } from '@nestjs/common';
-import { appendFileSync, existsSync, mkdirSync, renameSync, statSync } from 'fs';
-import { Request, Response } from 'express';
+// src/common/logger/nest-logger.service.ts
+import { ConsoleLogger, Inject, Injectable, Optional } from '@nestjs/common';
+import { LogsService } from './logs.service';
 
 @Injectable()
 export class EnhancedNativeLogger extends ConsoleLogger {
-  private logDir = 'logs';
-  private logFile = `${this.logDir}/application.log`;
-  private maxSize = 1024 * 1024 * 10; // 10MB
-
-  constructor(context?: string) {
+  constructor(
+    @Optional() @Inject(LogsService) private readonly logsService?: LogsService,
+    context?: string,
+  ) {
     super(context);
-    this.ensureLogDir();
-    this.rotateLogs();
-  }
-
-  private ensureLogDir() {
-    if (!existsSync(this.logDir)) {
-      mkdirSync(this.logDir, { recursive: true });
-    }
-  }
-
-  private rotateLogs() {
-    if (existsSync(this.logFile)) {
-      const stats = statSync(this.logFile);
-      if (stats.size > this.maxSize) {
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        renameSync(this.logFile, `${this.logDir}/application-${timestamp}.log`);
-      }
-    }
   }
 
   private sanitize(data: any): any {
     const sensitiveFields = ['password', 'token', 'authorization'];
     const sanitizeValue = (value: any) => {
-      if (typeof value !== 'object') return value;
+      if (value === null || value === undefined || typeof value !== 'object') return value;
       return Object.keys(value).reduce((acc, key) => {
-        acc[key] = sensitiveFields.includes(key.toLowerCase()) 
-          ? '*****' 
+        acc[key] = sensitiveFields.includes(key.toLowerCase())
+          ? '*****'
           : sanitizeValue(value[key]);
         return acc;
       }, {} as Record<string, any>);
@@ -70,19 +51,15 @@ export class EnhancedNativeLogger extends ConsoleLogger {
   }
 
   private writeLog(level: string, message: any, context?: string, meta?: Record<string, any>) {
-    try {
-      const entry = JSON.stringify({
-        timestamp: new Date().toISOString(),
-        level,
-        context: context || this.context,
-        message,
-        meta: this.sanitize(meta)
-      }) + '\n';
-      
-      appendFileSync(this.logFile, entry);
-      this.rotateLogs();
-    } catch (error) {
-      console.error('Failed to write log:', error);
-    }
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      level,
+      context: context || this.context,
+      message,
+      meta: this.sanitize(meta),
+    };
+    if (this.logsService) {
+      this.logsService.createLog(logEntry);
+    } 
   }
 }
