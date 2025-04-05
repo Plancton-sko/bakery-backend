@@ -1,9 +1,10 @@
+// src/product/product.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from './product.entity';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import { CreateProductDto } from './dtos/create-product.dto';
+import { UpdateProductDto } from './dtos/update-product.dto';
 
 @Injectable()
 export class ProductService {
@@ -36,5 +37,13 @@ export class ProductService {
   async remove(id: string): Promise<void> {
     const result = await this.productRepository.delete(id);
     if (result.affected === 0) throw new NotFoundException(`Product with ID ${id} not found`);
+  }
+
+  async uploadImage(id: string, image: string): Promise<Product> {
+    const product = await this.productRepository.findOne({ where: { id } });
+    if (!product) throw new NotFoundException(`Produto com ID ${id} não encontrado`);
+  
+    product.image = image; // Salva a imagem Base64 no banco
+    return await this.productRepository.save(product);
   }
 }

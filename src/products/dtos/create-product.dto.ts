@@ -1,3 +1,4 @@
+// src/product/dto/create-product.dto.ts
 import { IsString, IsNumber, IsNotEmpty, IsUrl } from 'class-validator';
 
 export class CreateProductDto {
