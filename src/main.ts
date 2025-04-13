@@ -10,6 +10,7 @@ import { RedisStore } from 'connect-redis';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import passport from 'passport';
 import { EnhancedNativeLogger } from './common/logger/nest-logger.service';
+import * as bodyParser from 'body-parser';
 
 
 async function bootstrap() {
@@ -17,6 +18,9 @@ async function bootstrap() {
     rawBody: true,
     logger: ['error', 'warn', 'log', 'debug', 'verbose']
   });
+
+  app.use(bodyParser.json({ limit: '10mb' }));
+  app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
 
   const configService = app.get(ConfigService);

@@ -15,7 +15,7 @@ export class Product {
   @Column('text')
   category: string;
 
-  @Column()
+  @Column({ nullable:true })
   image: string;
 
   @Column()

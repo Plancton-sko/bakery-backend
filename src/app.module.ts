@@ -19,6 +19,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { LogSchema } from './common/logger/log.schema';
 import { LogsService } from './common/logger/logs.service';
 import { ProductModule } from './products/product.module';
+import { Product } from './products/product.entity';
 
 @Module({
   imports: [
@@ -45,7 +46,7 @@ import { ProductModule } from './products/product.module';
         username: configService.get('DATABASE_USERNAME'),
         password: configService.get('DATABASE_PASSWORD'),
         database: configService.get('DATABASE_NAME'),
-        entities: [User],
+        entities: [User, Product],
         synchronize: true, // Alterar para `false` em produção
       }),
     }),
