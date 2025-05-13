@@ -10,6 +10,7 @@ import {
     UseGuards,
     UseInterceptors,
     UploadedFile,
+    Put,
   } from '@nestjs/common';
   import { FileInterceptor } from '@nestjs/platform-express';
   import { ProductService } from './product.service';
@@ -39,13 +40,13 @@ import {
     }
   
     @Post()
-    // @UseGuards(AuthenticatedGuard, RolesGuard)
-    // @Roles(UserRole.ADMIN)
+    @UseGuards(AuthenticatedGuard, RolesGuard)
+    @Roles(UserRole.ADMIN)
     async create(@Body() createProductDto: CreateProductDto): Promise<Product> {
       return this.productService.create(createProductDto);
     }
   
-    @Patch(':id')
+    @Put(':id')
     @UseGuards(AuthenticatedGuard, RolesGuard)
     @Roles(UserRole.ADMIN)
     async update(

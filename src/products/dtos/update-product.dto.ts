@@ -6,7 +6,7 @@ export class UpdateProductDto {
     @IsOptional()
     name: string;
   
-    @IsNumber()
+    @IsNumber({maxDecimalPlaces: 2})
     @IsOptional()
     price: number;
   

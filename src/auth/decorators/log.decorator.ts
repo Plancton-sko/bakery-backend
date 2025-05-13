@@ -1,4 +1,4 @@
-// src/common/decorators/log.decorator.ts
+// src/auth/decorators/log.decorator.ts
 import { EnhancedNativeLogger } from "src/common/logger/nest-logger.service";
 
 

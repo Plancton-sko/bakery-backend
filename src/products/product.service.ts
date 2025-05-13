@@ -73,7 +73,7 @@ export class ProductService {
     }
 
     // Define o bucket (se não existir, você pode criar ou garantir que ele já existe)
-    const bucket = process.env.MINIO_BUCKET || 'images';
+    const bucket = process.env.MINIO_BUCKET_NAME || 'images';
 
     try {
       await this.minioClient.putObject(bucket, fileName, bufferToUpload, bufferToUpload.length, {
@@ -91,7 +91,7 @@ export class ProductService {
     id: string,
     file: Express.Multer.File,
     convertToAvif: boolean = false,
-  ): Promise<Product> {
+  ):Promise<Product> {
     const product = await this.productRepository.findOne({ where: { id } });
     if (!product)
       throw new NotFoundException(`Produto com ID ${id} não encontrado`);

@@ -6,7 +6,7 @@ export class CreateProductDto {
   @IsNotEmpty()
   name: string;
 
-  @IsNumber()
+  @IsNumber({maxDecimalPlaces: 2})
   @IsNotEmpty()
   price: number;
 

@@ -7,6 +7,7 @@ import { UserModule } from '../user/user.module';
 import { SessionSerializer } from './session.serializer';
 import { AuthenticatedGuard } from './guards/authenticated.guard';
 import { LocalStrategy } from './strategies/local.strategy';
+import { EnhancedNativeLogger } from 'src/common/logger/nest-logger.service';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { LocalStrategy } from './strategies/local.strategy';
     LocalStrategy,
     SessionSerializer,
     AuthenticatedGuard,
+    EnhancedNativeLogger
   ],
   exports: [AuthService],
 })

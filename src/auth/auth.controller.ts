@@ -6,10 +6,14 @@ import { plainToInstance } from 'class-transformer';
 import { LoginResponseDto } from './dtos/login-response.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { Throttle } from '@nestjs/throttler';
+import { EnhancedNativeLogger } from 'src/common/logger/nest-logger.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService, 
+    private readonly logger: EnhancedNativeLogger
+  ) { }
+
 
 
   @Post('login')
