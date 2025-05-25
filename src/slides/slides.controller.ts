@@ -1,17 +1,29 @@
 // src/slides/slides.controller.ts
-import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Put,
+  UseInterceptors,
+  UploadedFile,
+  UseGuards,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { SlidesService } from './slides.service';
-import { RolesGuard } from 'src/auth/guards/role.guard';
-import { AuthenticatedGuard } from 'src/auth/guards/authenticated.guard';
 import { CreateSlideDto } from './dtos/create-slide.dto';
 import { UpdateSlideDto } from './dtos/update-slide.dto';
+import { LocalAuthGuard } from 'src/auth/guards/local-auth.guard';
+
 
 @Controller('slides')
 export class SlidesController {
   constructor(private readonly slidesService: SlidesService) {}
 
   @Post()
-  @UseGuards(AuthenticatedGuard, RolesGuard)
+  @UseGuards(LocalAuthGuard)
   create(@Body() createSlideDto: CreateSlideDto) {
     return this.slidesService.create(createSlideDto);
   }
@@ -27,14 +39,24 @@ export class SlidesController {
   }
 
   @Put(':id')
-  @UseGuards(AuthenticatedGuard, RolesGuard)
+  @UseGuards(LocalAuthGuard)
   update(@Param('id') id: string, @Body() updateSlideDto: UpdateSlideDto) {
     return this.slidesService.update(id, updateSlideDto);
   }
 
   @Delete(':id')
-  @UseGuards(AuthenticatedGuard, RolesGuard)
+  @UseGuards(LocalAuthGuard)
   remove(@Param('id') id: string) {
     return this.slidesService.remove(id);
+  }
+
+  @Post(':id/upload')
+  @UseGuards(LocalAuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  uploadImage(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.slidesService.uploadImage(id, file);
   }
 }

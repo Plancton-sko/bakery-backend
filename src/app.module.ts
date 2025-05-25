@@ -1,5 +1,5 @@
 // src/app.module.ts
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { forwardRef, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -20,9 +20,15 @@ import { LogSchema } from './common/logger/log.schema';
 import { LogsService } from './common/logger/logs.service';
 import { ProductModule } from './products/product.module';
 import { Product } from './products/product.entity';
+import { OrdersModule } from './orders/orders.module';
+import { OrderItem } from './orders/entities/order-item.entity';
+import { Order } from './orders/entities/order.entity';
+import { Customer } from './customer/entities/customer.entity';
+import { CustomersModule } from './customer/customers.module';
 
 @Module({
   imports: [
+    
     ConfigModule.forRoot({
       isGlobal: true, // Disponível globalmente
       envFilePath: '.env', // Define o arquivo de variáveis de ambiente
@@ -46,7 +52,7 @@ import { Product } from './products/product.entity';
         username: configService.get('DATABASE_USERNAME'),
         password: configService.get('DATABASE_PASSWORD'),
         database: configService.get('DATABASE_NAME'),
-        entities: [User, Product],
+        entities: [User, Product, OrderItem, Order, Customer],
         synchronize: true, // Alterar para `false` em produção
       }),
     }),
@@ -62,7 +68,9 @@ import { Product } from './products/product.entity';
     UserModule,
     AuthModule,
     RedisModule,
-    ProductModule
+    OrdersModule,
+    ProductModule,
+    CustomersModule,
   ],
   controllers: [AppController],
   providers: [
