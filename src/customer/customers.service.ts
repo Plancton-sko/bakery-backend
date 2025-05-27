@@ -13,7 +13,7 @@ export class CustomersService {
         private readonly customerRepository: Repository<Customer>,
 
     ) { }
-
+// #FIXME: I need to fix this later, for now is fine 
     private readonly logger: Logger;
     async create(createCustomerDto: CreateCustomerDto) {
         try {
