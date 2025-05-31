@@ -15,9 +15,9 @@ export class Order {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ 
-    unique: true, 
-    generated: 'uuid', 
+  @Column({
+    unique: true,
+    generated: 'uuid',
   })
   orderNumber: string;
 

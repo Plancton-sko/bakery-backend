@@ -23,6 +23,7 @@ import {
   import { UserRole } from 'src/user/user.entity';
   import { Roles } from 'src/auth/decorators/roles.decorator';
   
+  // #FIXME: I need help, this code is shit 
   @Controller('products')
   export class ProductController {
     constructor(private readonly productService: ProductService) {}

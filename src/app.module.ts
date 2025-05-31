@@ -28,7 +28,7 @@ import { CustomersModule } from './customer/customers.module';
 
 @Module({
   imports: [
-    
+
     ConfigModule.forRoot({
       isGlobal: true, // Disponível globalmente
       envFilePath: '.env', // Define o arquivo de variáveis de ambiente

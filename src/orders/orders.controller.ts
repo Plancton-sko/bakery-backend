@@ -9,7 +9,7 @@ import { LocalAuthGuard } from 'src/auth/guards/local-auth.guard';
 
 @Controller('orders')
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(private readonly ordersService: OrdersService) { }
 
   @Public()
   @Post()

@@ -12,10 +12,10 @@ import { Product } from 'src/products/product.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Customer, Order, OrderItem, Product]),
-    
+
   ],
   controllers: [CustomersController],
   providers: [CustomersService],
   exports: [CustomersService]
 })
-export class CustomersModule {}
+export class CustomersModule { }

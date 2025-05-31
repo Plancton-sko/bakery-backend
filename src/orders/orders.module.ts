@@ -18,4 +18,4 @@ import { Product } from 'src/products/product.entity';
   providers: [OrdersService],
   exports: [OrdersService]
 })
-export class OrdersModule {}
+export class OrdersModule { }

@@ -10,6 +10,7 @@ import { UpdateProductDto } from './dtos/update-product.dto';
 import * as Minio from 'minio';
 import sharp from 'sharp';
 
+// #FIXME: I dont know how the fuck this works 
 @Injectable()
 export class ProductService {
   private minioClient: Minio.Client;
@@ -86,12 +87,12 @@ export class ProductService {
       throw new Error(`Erro ao fazer upload da imagem para o Minio: ${err.message}`);
     }
   }
-  
+
   async uploadImage(
     id: string,
     file: Express.Multer.File,
     convertToAvif: boolean = false,
-  ):Promise<Product> {
+  ): Promise<Product> {
     const product = await this.productRepository.findOne({ where: { id } });
     if (!product)
       throw new NotFoundException(`Produto com ID ${id} não encontrado`);

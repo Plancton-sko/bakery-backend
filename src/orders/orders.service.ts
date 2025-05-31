@@ -21,7 +21,7 @@ export class OrdersService {
     private customerRepository: Repository<Customer>,
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
-  ) {}
+  ) { }
 
   async create(createOrderDto: CreateOrderDto) {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -50,7 +50,7 @@ export class OrdersService {
       order.customer = customer;
       order.status = OrderStatus.PENDING;
       order.notes = createOrderDto.notes;
-      
+
       // Calcular o total do pedido
       let total = 0;
       const savedOrder = await queryRunner.manager.save(order);
@@ -82,7 +82,7 @@ export class OrdersService {
       await queryRunner.manager.save(savedOrder);
 
       await queryRunner.commitTransaction();
-      
+
       return this.findOne(savedOrder.id);
     } catch (error) {
       await queryRunner.rollbackTransaction();

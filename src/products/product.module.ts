@@ -14,4 +14,4 @@ import { Customer } from 'src/customer/entities/customer.entity';
   providers: [ProductService],
   exports: [ProductService],
 })
-export class ProductModule {}
+export class ProductModule { }

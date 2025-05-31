@@ -20,7 +20,7 @@ import { LocalAuthGuard } from 'src/auth/guards/local-auth.guard';
 
 @Controller('slides')
 export class SlidesController {
-  constructor(private readonly slidesService: SlidesService) {}
+  constructor(private readonly slidesService: SlidesService) { }
 
   @Post()
   @UseGuards(LocalAuthGuard)
