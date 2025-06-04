@@ -5,7 +5,7 @@ import { Repository, DataSource } from 'typeorm';
 import { Order, OrderStatus } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { Customer } from 'src/customer/entities/customer.entity';
-import { Product } from 'src/products/product.entity';
+import { Product } from 'src/products/entities/product.entity';
 import { CreateOrderDto } from './dtos/create-order.dto';
 import { UpdateOrderDto } from './dtos/update-order.dto';
 

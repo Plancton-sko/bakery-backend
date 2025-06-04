@@ -19,7 +19,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { LogSchema } from './common/logger/log.schema';
 import { LogsService } from './common/logger/logs.service';
 import { ProductModule } from './products/product.module';
-import { Product } from './products/product.entity';
+import { Product } from './products/entities/product.entity';
 import { OrdersModule } from './orders/orders.module';
 import { OrderItem } from './orders/entities/order-item.entity';
 import { Order } from './orders/entities/order.entity';

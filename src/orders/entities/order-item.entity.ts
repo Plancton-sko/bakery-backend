@@ -1,7 +1,7 @@
 // src/orders/entities/order-item.entity.ts
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn } from 'typeorm';
 import { Order } from './order.entity';
-import { Product } from 'src/products/product.entity';
+import { Product } from 'src/products/entities/product.entity';
 
 @Entity()
 export class OrderItem {

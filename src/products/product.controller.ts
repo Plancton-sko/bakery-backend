@@ -16,14 +16,14 @@ import {
   import { ProductService } from './product.service';
   import { CreateProductDto } from './dtos/create-product.dto';
   import { UpdateProductDto } from './dtos/update-product.dto';
-  import { Product } from './product.entity';
+  import { Product } from './entities/product.entity';
   import { Public } from 'src/auth/decorators/public.decorator';
   import { RolesGuard } from 'src/auth/guards/role.guard';
   import { AuthenticatedGuard } from 'src/auth/guards/authenticated.guard';
   import { UserRole } from 'src/user/user.entity';
   import { Roles } from 'src/auth/decorators/roles.decorator';
   
-  // #FIXME: I need help, this code is shit 
+ 
   @Controller('products')
   export class ProductController {
     constructor(private readonly productService: ProductService) {}

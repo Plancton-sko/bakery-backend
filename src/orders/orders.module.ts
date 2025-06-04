@@ -7,7 +7,7 @@ import { Order } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { AuthModule } from '../auth/auth.module';
 import { Customer } from 'src/customer/entities/customer.entity';
-import { Product } from 'src/products/product.entity';
+import { Product } from 'src/products/entities/product.entity';
 
 @Module({
   imports: [

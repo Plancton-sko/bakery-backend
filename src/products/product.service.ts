@@ -2,7 +2,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Product } from './product.entity';
+import { Product } from './entities/product.entity';
 import { CreateProductDto } from './dtos/create-product.dto';
 import { UpdateProductDto } from './dtos/update-product.dto';
 
@@ -10,7 +10,7 @@ import { UpdateProductDto } from './dtos/update-product.dto';
 import * as Minio from 'minio';
 import sharp from 'sharp';
 
-// #FIXME: I dont know how the fuck this works 
+
 @Injectable()
 export class ProductService {
   private minioClient: Minio.Client;

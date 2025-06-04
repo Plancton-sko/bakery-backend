@@ -7,7 +7,7 @@ import { Customer } from './entities/customer.entity';
 import { EnhancedNativeLogger } from '../common/logger/nest-logger.service';
 import { Order } from 'src/orders/entities/order.entity';
 import { OrderItem } from 'src/orders/entities/order-item.entity';
-import { Product } from 'src/products/product.entity';
+import { Product } from 'src/products/entities/product.entity';
 
 @Module({
   imports: [
