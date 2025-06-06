@@ -4,9 +4,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { SlidesService } from './slides.service';
 import { SlidesController } from './slides.controller';
 import { Slide } from './entities/slide.entity';
+import { Image } from '../gallery/entities/image.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Slide])],
+  imports: [TypeOrmModule.forFeature([Slide, Image])],
   controllers: [SlidesController],
   providers: [SlidesService],
 })

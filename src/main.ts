@@ -121,6 +121,8 @@ async function bootstrap() {
 
   logger.log('Aplicação iniciada, configurando serviços...', 'Bootstrap');
 
+  // app.setGlobalPrefix('api');
+  
   await app.listen(port);
   logger.log(`Application is running on: http://localhost:${port}`, 'Bootstrap');
 }
