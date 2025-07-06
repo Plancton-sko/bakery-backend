@@ -30,6 +30,7 @@ import { ImageVariant } from './gallery/entities/image-variant.entity';
 import { Image } from './gallery/entities/image.entity';
 import { Slide } from './slides/entities/slide.entity';
 import { SlidesModule } from './slides/slides.module';
+import { ProductImage } from './products/entities/product-image.entity';
 
 @Module({
   imports: [
@@ -57,7 +58,7 @@ import { SlidesModule } from './slides/slides.module';
         username: configService.get('DATABASE_USERNAME'),
         password: configService.get('DATABASE_PASSWORD'),
         database: configService.get('DATABASE_NAME'),
-        entities: [User, Product, OrderItem, Order, Customer, ImageVariant, Image, Slide],
+        entities: [User, Product, OrderItem, Order, Customer, ImageVariant, Image, Slide, ProductImage],
         synchronize: true, // Alterar para `false` em produção
       }),
     }),

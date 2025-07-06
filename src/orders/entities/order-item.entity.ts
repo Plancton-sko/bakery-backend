@@ -10,7 +10,7 @@ export class OrderItem {
 
     @ManyToOne(() => Order, order => order.items)
     order: Order;
-    // FIXME: OrderItems
+  
     @ManyToOne(() => Product, (product) => product.orderItems)
     product: Product;
 

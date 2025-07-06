@@ -110,9 +110,9 @@ export class UserController {
 
   // Criação de usuário admin
   @Post('admin')
-  // @UseGuards(RolesGuard)
-  // @Roles(UserRole.ADMIN)
-  @Public()
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  // @Public()
   async createAdmin(@Body() createAdminDto: CreateAdminDto, @Req() req: Request): Promise<UserOutputDto> {
     if (createAdminDto.adminSecret !== process.env.ADMIN_CREATION_SECRET) {
       this.logger.error(

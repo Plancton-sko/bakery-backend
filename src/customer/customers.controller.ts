@@ -6,7 +6,6 @@ import { Public } from 'src/auth/decorators/public.decorator';
 import { CreateCustomerDto } from './dtos/create-customer.dto';
 import { UpdateCustomerDto } from './dtos/update-customer.dto';
 
-// #FIXME: I need to fix this later, this looks like trash 
 @Controller('customers')
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}

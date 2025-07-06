@@ -1,13 +1,15 @@
 // src/product/dto/create-product.dto.ts
-import { IsString, IsNumber, IsNotEmpty, IsUrl, IsBase64, IsOptional } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsString, IsNumber, IsNotEmpty, IsUrl, IsBase64, IsOptional, Min } from 'class-validator';
 
 export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @IsNumber({maxDecimalPlaces: 2})
-  @IsNotEmpty()
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber()
+  @Min(0)
   price: number;
 
   @IsString()
@@ -16,7 +18,7 @@ export class CreateProductDto {
 
   @IsString()
   @IsOptional()
-  image: string;
+  image?: string;
 
   @IsString()
   @IsNotEmpty()

@@ -36,7 +36,7 @@ async function bootstrap() {
           styleSrc: ["'self'", "'unsafe-inline'"],
           imgSrc: ["'self'", 'data:', 'trusted-cdn.com'],
           fontSrc: ["'self'", 'fonts.gstatic.com'],
-          connectSrc: ["'self'", 'api.seuservico.com'],
+          connectSrc: ["'self'", 'api.seuservico.com', 'http://localhost:5173'],
           frameAncestors: ["'none'"],
         },
       },
@@ -51,24 +51,34 @@ async function bootstrap() {
   );
 
   // ==================== CORS Configuration ====================
-  const corsOptions = {
-    origin:
-      configService.get('NODE_ENV') === 'production'
-        ? [
-          'https://joaodev.xyz',
-          'https://www.joaodev.xyz',
-          'https://bakery.joaodev.xyz',
-          'https://api.joaodev.xyz',
-        ]
-        : ['http://localhost:3000', 'http://localhost:5173'],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: 'Content-Type,Authorization',
-    credentials: true,
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-  };
+  const isProd = configService.get('NODE_ENV') === 'production';
 
-  app.enableCors(corsOptions);
+  const whitelist = isProd
+    ? [
+      'https://joaodev.xyz',
+      'https://www.joaodev.xyz',
+      'https://bakery.joaodev.xyz',
+      'https://api.joaodev.xyz',
+    ]
+    : [
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+    ];
+
+  app.enableCors({
+    origin: (origin, callback) => {
+      if (!origin || whitelist.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`Blocked by CORS: ${origin}`));
+      }
+    },
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  });
 
   // =========================== Redis ==============================
 
@@ -122,7 +132,7 @@ async function bootstrap() {
   logger.log('Aplicação iniciada, configurando serviços...', 'Bootstrap');
 
   // app.setGlobalPrefix('api');
-  
+
   await app.listen(port);
   logger.log(`Application is running on: http://localhost:${port}`, 'Bootstrap');
 }

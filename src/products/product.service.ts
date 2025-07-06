@@ -8,16 +8,28 @@ import { UpdateProductDto } from './dtos/update-product.dto';
 
 // Importações para o Minio e conversão de imagens
 import * as Minio from 'minio';
-import sharp from 'sharp';
-
+import { ProductImage, ProductImageFormat, ProductImageSize } from './entities/product-image.entity';
+import { ImageProcessingService, ImageSizeConfig } from 'src/common/services/image-processing.service';
+import { ImageFormat } from 'src/gallery/entities/image-variant.entity';
 
 @Injectable()
 export class ProductService {
   private minioClient: Minio.Client;
 
+  private readonly sizeConfigs: Record<string, ImageSizeConfig> = {
+    thumbnail: { width: 150, height: 150, quality: 75, fit: 'cover' },
+    small: { width: 400, height: 400, quality: 85, fit: 'inside' },
+    medium: { width: 800, height: 800, quality: 90, fit: 'inside' },
+    large: { width: 1200, height: 1200, quality: 90, fit: 'inside' },
+    original: { width: null, height: null, quality: 95, fit: 'inside' },
+  };
+
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+    @InjectRepository(ProductImage)
+    private readonly productImageRepository: Repository<ProductImage>,
+    private readonly imageProcessor: ImageProcessingService,
   ) {
     // Inicializa o cliente do Minio com as variáveis de ambiente
     this.minioClient = new Minio.Client({
@@ -39,9 +51,27 @@ export class ProductService {
     return product;
   }
 
-  async create(createProductDto: CreateProductDto): Promise<Product> {
+  /**
+   * Método consolidado para criar produto (sempre com imagem)
+   */
+  async create(
+    createProductDto: CreateProductDto,
+    file: Express.Multer.File,
+    convertToAvif: boolean = true
+  ): Promise<Product> {
+    // Valida se o arquivo foi enviado
+    if (!file) {
+      throw new Error('Imagem é obrigatória para criar um produto');
+    }
+
+    // Primeiro cria o produto sem imagem
     const newProduct = this.productRepository.create(createProductDto);
-    return await this.productRepository.save(newProduct);
+    const savedProduct = await this.productRepository.save(newProduct);
+
+    // Depois adiciona a imagem ao produto criado
+    const productWithImage = await this.processAndUploadImage(savedProduct, file, convertToAvif);
+
+    return productWithImage;
   }
 
   async update(id: string, updateProductDto: UpdateProductDto): Promise<Product> {
@@ -56,56 +86,82 @@ export class ProductService {
       throw new NotFoundException(`Product with ID ${id} not found`);
   }
 
-  private async uploadImageToMinio(
-    fileBuffer: Buffer,
-    fileName: string,
-    convertToAvif: boolean,
-  ): Promise<string> {
-    // Define valores padrão
-    let bufferToUpload = fileBuffer;
-    let contentType = 'image/jpeg';
+  /**
+   * Método para processar e fazer upload da imagem
+   */
+  private async processAndUploadImage(
+    product: Product,
+    file: Express.Multer.File,
+    convertToAvif: boolean
+  ): Promise<Product> {
+    const bucket = process.env.MINIO_BUCKET_NAME || 'products';
 
-    // Caso o usuário deseje converter para AVIF
-    if (convertToAvif) {
-      bufferToUpload = await sharp(fileBuffer)
-        .toFormat('avif', { quality: 50 })
-        .toBuffer();
-      contentType = 'image/avif';
-    }
+    // Gera variantes apenas em AVIF
+    const variants = await this.imageProcessor.generateVariants(
+      file.buffer,
+      [ImageFormat.AVIF], // AVIF somente
+      this.sizeConfigs
+    );
 
-    // Define o bucket (se não existir, você pode criar ou garantir que ele já existe)
-    const bucket = process.env.MINIO_BUCKET_NAME || 'images';
+    const savedImages: ProductImage[] = [];
 
-    try {
-      await this.minioClient.putObject(bucket, fileName, bufferToUpload, bufferToUpload.length, {
-        'Content-Type': contentType,
+    for (const variant of variants) {
+      const objectName = `${product.id}/${variant.sizeKey}-${Date.now()}.avif`;
+
+      // Upload para MinIO
+      await this.minioClient.putObject(
+        bucket,
+        objectName,
+        variant.data,
+        variant.data.length,
+        {
+          'Content-Type': variant.contentType,
+        }
+      );
+
+      const imageUrl = `${process.env.MINIO_PUBLIC_URL}/${bucket}/${objectName}`;
+
+      const productImage = this.productImageRepository.create({
+        product,
+        format: ProductImageFormat.AVIF,
+        size: variant.sizeKey as ProductImageSize,
+        url: imageUrl,
+        width: variant.width,
+        height: variant.height,
+        fileSize: variant.fileSize,
+        quality: variant.quality,
       });
-      // Cria a URL pública baseada em uma variável de ambiente ou padrão de URL
-      const imageUrl = `${process.env.MINIO_URL}/${bucket}/${fileName}`;
-      return imageUrl;
-    } catch (err: any) {
-      throw new Error(`Erro ao fazer upload da imagem para o Minio: ${err.message}`);
+
+      savedImages.push(productImage);
     }
+
+    // Salva todas as variantes no banco
+    await this.productImageRepository.save(savedImages);
+
+    // Define a imagem principal como a variante "medium"
+    const medium = savedImages.find(v => v.size === ProductImageSize.MEDIUM);
+    if (medium) {
+      product.image = medium.url;
+    }
+
+    return await this.productRepository.save(product);
   }
 
+  /**
+   * Método para fazer upload de imagem em produto existente
+   */
   async uploadImage(
     id: string,
     file: Express.Multer.File,
-    convertToAvif: boolean = false,
+    convertToAvif: boolean
   ): Promise<Product> {
-    const product = await this.productRepository.findOne({ where: { id } });
-    if (!product)
-      throw new NotFoundException(`Produto com ID ${id} não encontrado`);
+    const product = await this.productRepository.findOne({
+      where: { id },
+      relations: ['images'],
+    });
 
-    // Define o nome do arquivo: pode ser composto pelo id do produto e timestamp
-    const extension = convertToAvif
-      ? 'avif'
-      : file.mimetype.split('/')[1]; // extrai a extensão com base no mimetype
-    const fileName = `${id}-${Date.now()}.${extension}`;
+    if (!product) throw new NotFoundException(`Produto com ID ${id} não encontrado`);
 
-    // Realiza o upload para o Minio
-    const imageUrl = await this.uploadImageToMinio(file.buffer, fileName, convertToAvif);
-    product.image = imageUrl;
-    return await this.productRepository.save(product);
+    return await this.processAndUploadImage(product, file, convertToAvif);
   }
 }
