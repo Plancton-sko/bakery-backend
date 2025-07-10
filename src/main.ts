@@ -95,7 +95,7 @@ async function bootstrap() {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: false,
+        secure: isProd,
         httpOnly: true,
         maxAge: 86400 * 1000, // 1 day in ms
         sameSite: 'lax'

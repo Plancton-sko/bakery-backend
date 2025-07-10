@@ -5,18 +5,11 @@ import { HighlightService } from './highlight.service';
 import { HighlightController } from './highlight.controller';
 import { Highlight } from './entities/highlight.entity';
 import { Product } from 'src/products/entities/product.entity';
-import { ImageProcessingService } from 'src/common/services/image-processing.service';
-import { ProductController } from 'src/products/product.controller';
-import { ProductService } from 'src/products/product.service';
-import { ProductImage } from 'src/products/entities/product-image.entity';
-
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Product, ProductImage]),
-  ],
-  controllers: [ProductController],
-  providers: [ProductService, ImageProcessingService],
-  exports: [ProductService],
+  imports: [TypeOrmModule.forFeature([Highlight, Product])],
+  controllers: [HighlightController],
+  providers: [HighlightService],
+  exports: [HighlightService],
 })
-export class ProductModule {}
+export class HighlightModule {}

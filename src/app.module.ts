@@ -31,6 +31,8 @@ import { Image } from './gallery/entities/image.entity';
 import { Slide } from './slides/entities/slide.entity';
 import { SlidesModule } from './slides/slides.module';
 import { ProductImage } from './products/entities/product-image.entity';
+import { HighlightModule } from './highlight/highlight.module';
+import { Highlight } from './highlight/entities/highlight.entity';
 
 @Module({
   imports: [
@@ -58,7 +60,7 @@ import { ProductImage } from './products/entities/product-image.entity';
         username: configService.get('DATABASE_USERNAME'),
         password: configService.get('DATABASE_PASSWORD'),
         database: configService.get('DATABASE_NAME'),
-        entities: [User, Product, OrderItem, Order, Customer, ImageVariant, Image, Slide, ProductImage],
+        entities: [User, Product, OrderItem, Order, Customer, ImageVariant, Image, Slide, ProductImage, Highlight],
         synchronize: true, // Alterar para `false` em produção
       }),
     }),
@@ -79,6 +81,7 @@ import { ProductImage } from './products/entities/product-image.entity';
     CustomersModule,
     GalleryModule,
     SlidesModule,
+    HighlightModule,
   ],
   controllers: [AppController],
   providers: [
