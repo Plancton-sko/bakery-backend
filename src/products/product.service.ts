@@ -56,22 +56,22 @@ export class ProductService {
    */
   async create(
     createProductDto: CreateProductDto,
-    file: Express.Multer.File,
+    file?: Express.Multer.File,
     convertToAvif: boolean = true
   ): Promise<Product> {
     // Valida se o arquivo foi enviado
-    if (!file) {
-      throw new Error('Imagem é obrigatória para criar um produto');
+    if (!file && !createProductDto.image) {
+      throw new Error('É necessário fornecer uma imagem (upload ou URL da galeria)');
     }
 
-    // Primeiro cria o produto sem imagem
     const newProduct = this.productRepository.create(createProductDto);
     const savedProduct = await this.productRepository.save(newProduct);
 
-    // Depois adiciona a imagem ao produto criado
-    const productWithImage = await this.processAndUploadImage(savedProduct, file, convertToAvif);
+    if (file) {
+      return await this.processAndUploadImage(savedProduct, file, convertToAvif);
+    }
 
-    return productWithImage;
+    return savedProduct;
   }
 
   async update(id: string, updateProductDto: UpdateProductDto): Promise<Product> {

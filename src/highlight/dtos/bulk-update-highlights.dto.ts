@@ -1,6 +1,6 @@
 // src/highlight/dtos/bulk-update-highlights.dto.ts
 import { IsArray, IsBoolean, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 export class HighlightData {
   @IsString()
@@ -9,6 +9,7 @@ export class HighlightData {
   @IsString()
   name: string;
 
+  @Transform(({ value }) => Number(value))
   @IsNumber()
   price: number;
 

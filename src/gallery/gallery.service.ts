@@ -635,4 +635,15 @@ export class GalleryService {
             updatedAt: image.updatedAt,
         };
     }
+
+    async getAllTags(): Promise<string[]> {
+        const result = await this.imageRepository
+            .createQueryBuilder('image')
+            .select('unnest(string_to_array(image.tags, \',\'))', 'tag')
+            .groupBy('tag')
+            .orderBy('tag', 'ASC')
+            .getRawMany();
+
+        return result.map((row) => row.tag);
+    }
 }

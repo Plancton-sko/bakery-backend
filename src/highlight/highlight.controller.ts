@@ -21,7 +21,7 @@ import { UserRole } from '../user/user.entity';
 
 @Controller('highlights')
 export class HighlightController {
-  constructor(private readonly highlightService: HighlightService) {}
+  constructor(private readonly highlightService: HighlightService) { }
 
   @Get()
   @Public()

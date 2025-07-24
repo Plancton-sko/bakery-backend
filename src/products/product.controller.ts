@@ -28,7 +28,7 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @Controller('products')
 export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(private readonly productService: ProductService) { }
 
   @Get()
   @Public()
@@ -51,27 +51,25 @@ export class ProductController {
   @UseInterceptors(FileInterceptor('file'))
   @Public()
   async create(
-    @Body() body: any, // Usamos any aqui pois os dados vêm do multipart
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }), // 10MB
-          new FileTypeValidator({ fileType: /^image\/(jpeg|png|gif|webp|avif)$/ }),
-        ],
-      }),
-    ) file: Express.Multer.File,
+    @Body() body: any,
+    @UploadedFile() file: Express.Multer.File | undefined,
     @Query('convertToAvif') convertToAvif: string = 'true',
   ): Promise<Product> {
-    // Converte manualmente os dados do body para o DTO
     const createProductDto: CreateProductDto = {
       name: body.name,
       price: parseFloat(body.price),
       category: body.category,
       description: body.description,
-      image: body.image, // opcional
+      image: body.image, // caso use imagem da galeria
     };
 
     const shouldConvert = convertToAvif === 'true';
+
+    // Se não vier nem file nem URL de imagem, dá erro
+    if (!file && !createProductDto.image) {
+      throw new Error('É necessário enviar uma imagem ou selecionar da galeria');
+    }
+
     return this.productService.create(createProductDto, file, shouldConvert);
   }
 

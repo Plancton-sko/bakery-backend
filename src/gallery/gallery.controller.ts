@@ -58,6 +58,18 @@ export class GalleryController {
         return this.galleryService.uploadImage(file, createImageDto);
     }
 
+    @Get('tags')
+    @Public()
+    async getAllTags(): Promise<ApiResponse<string[]>> {
+        const tags = await this.galleryService.getAllTags();
+        return {
+            success: true,
+            data: tags,
+            timestamp: new Date().toISOString(),
+        };
+    }
+
+
     @Get()
     @Public()
     async findAllSimple(
