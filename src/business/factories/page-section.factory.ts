@@ -1,5 +1,5 @@
 // === src/business/factories/page-section.factory.ts ===
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PageSection } from '../entities/page-section.entity';
 import { HeroSliderSection } from '../entities/hero-slider-section.entity';
 import { ContactSection } from '../entities/contact-section.entity';
@@ -23,7 +23,9 @@ export class PageSectionFactory {
   create(type: string): PageSection {
     const SectionClass = this.sectionMap.get(type);
     if (!SectionClass) {
-      throw new Error(`Unsupported section type: ${type}`);
+      throw new BadRequestException(
+        `Unsupported section type: ${type}`
+      );
     }
     return new SectionClass();
   }
