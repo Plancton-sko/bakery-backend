@@ -29,7 +29,7 @@ export class AuthController {
     return res.json({
       message: 'Login successful',
       user: plainToInstance(UserOutputDto, req.user),
-      // csrfToken: req.csrfToken(), 
+      csrfToken: req.csrfToken(), 
     });
   }
 

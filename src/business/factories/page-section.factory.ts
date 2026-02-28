@@ -31,6 +31,7 @@ export class PageSectionFactory {
   }
 
   //   #TODO:  Criar entidade de sectionMap para armazenar nos banco de dados se eu quiser persistencia em armazenamentop não em RAM
+  
   register(type: string, section: new () => PageSection) {
     this.sectionMap.set(type, section);
   }
